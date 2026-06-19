@@ -51,11 +51,11 @@ detect_current_env() {
     fi
 }
 
-clear
+clear 2>/dev/null || true
 CURRENT_ENV=$(detect_current_env)
 
 echo "================================================="
-echo "   🌌 Universal Omni-Workspace Swapper v4.0      "
+echo "   🌌 Universal Omni-Workspace Swapper v4.1      "
 echo "================================================="
 echo "🐧 OS Family Detected: [$DISTRO_ID / $PKGMGR]"
 echo "💻 Active Interface:   [$CURRENT_ENV]"
@@ -89,7 +89,7 @@ case $main_choice in
         done
         read -p "Selection: " sub_choice
 
-        if [[ "$sub_choice" -get 1 && "$sub_choice" -le "${#AVAILABLE_ENVS[@]}" ]]; then
+        if [[ "$sub_choice" -ge 1 && "$sub_choice" -le "${#AVAILABLE_ENVS[@]}" ]]; then
             TARGET_ENV="${AVAILABLE_ENVS[$((sub_choice-1))]}"
         else
             echo "❌ Invalid selection." && exit 1
@@ -204,7 +204,7 @@ case $main_choice in
                 "GNOME (DE)")      apt purge -y task-gnome-desktop gdm3 gnome-shell ;;
                 "KDE-Plasma (DE)") apt purge -y task-kde-desktop plasma-workspace plasma-desktop ;;
                 "XFCE (DE)")       apt purge -y task-xfce-desktop ;;
-                "Cinnamon (DE)")   apt purge -y task-cinnamon-desktop ;;
+                "Cinnamon (DE)")   apt install -y task-cinnamon-desktop sddm ;;
                 "MATE (DE)")       apt purge -y task-mate-desktop ;;
                 "Hyprland (WM)")   apt purge -y hyprland ;;
                 "i3wm (WM)")       apt purge -y i3 i3-wm ;;

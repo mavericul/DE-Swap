@@ -70,7 +70,7 @@ else
 fi
 
 echo "================================================="
-echo "   Universal Omni-Workspace Swapper v5.5      "
+echo "   Universal Omni-Workspace Swapper v5.6      "
 echo "================================================="
 echo "OS Family Detected: [$DISTRO_ID / $PKGMGR]"
 echo "Active Interface:   [$CURRENT_ENV]"
@@ -189,6 +189,14 @@ echo -e "\nFinalizing display manager alignment..."
 systemctl disable gdm gdm3 sddm lightdm 2>/dev/null || true
 systemctl enable $TARGET_DM_SERVICE --force
 
+# Debian/Ubuntu specific file-level default login screen override
+if [ "$PKGMGR" == "apt" ]; then
+    DM_BIN_PATH=$(command -v $TARGET_DM_SERVICE)
+    if [ -n "$DM_BIN_PATH" ]; then
+        echo "$DM_BIN_PATH" > /etc/X11/default-display-manager
+    fi
+fi
+
 # =========================================================
 # 6. OPTIONAL DEEP PURGE PHASE (Executes SECOND)
 # =========================================================
@@ -254,7 +262,7 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
                 "MATE (DE)")       apt purge -y task-mate-desktop $PURGE_DM_STRING ;;
                 "COSMIC (DE)")     apt purge -y cosmic-session $PURGE_DM_STRING ;;
                 "Hyprland (WM)")   apt purge -y hyprland $PURGE_DM_STRING ;;
-                "i3wm (WM)")       apt purge -y i3 i3-wm $PURGE_DM_STRING ;;
+                "i3wm (WM)")       apt install -y i3 i3-wm $PURGE_DM_STRING ;;
                 "Sway (WM)")       apt purge -y sway $PURGE_DM_STRING ;;
             esac
         fi

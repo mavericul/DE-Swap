@@ -2,7 +2,7 @@
 
 # 1. Root privilege check
 if [ "$EUID" -ne 0 ]; then
-  echo "Error: Please run this script with sudo (e.g., sudo ./deswap.sh)"
+  echo "Error: Please run this script with sudo (e.g., sudo ./omni-swap.sh)"
   exit 1
 fi
 
@@ -54,21 +54,21 @@ detect_current_env() {
 clear 2>/dev/null || true
 CURRENT_ENV=$(detect_current_env)
 
-# Map current login manager configurations
+# Precise Current Display Manager Resolver
 if [[ "$CURRENT_ENV" == "GNOME (DE)" ]]; then
     CURRENT_DM_SERVICE="gdm"
-    if [ "$PKGMGR" == "apt" ]; then CURRENT_DM_SERVICE="gdm3"; fi
+    [ "$PKGMGR" == "apt" ] && CURRENT_DM_SERVICE="gdm3"
     CURRENT_DM_PKGS="$CURRENT_DM_SERVICE"
-elif [[ "$CURRENT_ENV" == "XFCE (DE)" && ( "$PKGMGR" == "dnf" || "$PKGMGR" == "apt" ) ]]; then
+elif [[ "$CURRENT_ENV" == "KDE-Plasma (DE)" || "$CURRENT_ENV" == "Hyprland (WM)" || "$CURRENT_ENV" == "Sway (WM)" ]]; then
+    CURRENT_DM_SERVICE="sddm"
+    [[ "$DISTRO_ID" == "cachyos" || "$DISTRO_ID" == "arch" ]] && CURRENT_DM_PKGS="sddm sddm-kcm" || CURRENT_DM_PKGS="sddm"
+else
     CURRENT_DM_SERVICE="lightdm"
     if [ "$PKGMGR" == "dnf" ]; then CURRENT_DM_PKGS="lightdm lightdm-gtk"; else CURRENT_DM_PKGS="lightdm lightdm-gtk-greeter"; fi
-else
-    CURRENT_DM_SERVICE="sddm"
-    if [[ "$DISTRO_ID" == "cachyos" || "$DISTRO_ID" == "arch" ]]; then CURRENT_DM_PKGS="sddm sddm-kcm"; else CURRENT_DM_PKGS="sddm"; fi
 fi
 
 echo "================================================="
-echo "   Universal Omni-Workspace Swapper v5.1      "
+echo "   Universal Omni-Workspace Swapper v5.4      "
 echo "================================================="
 echo "OS Family Detected: [$DISTRO_ID / $PKGMGR]"
 echo "Active Interface:   [$CURRENT_ENV]"
@@ -82,7 +82,6 @@ ALL_ENVS=(
 )
 AVAILABLE_ENVS=()
 
-# Dynamically filter out the current desktop environment
 for env in "${ALL_ENVS[@]}"; do
     if [ "$env" != "$CURRENT_ENV" ]; then
         AVAILABLE_ENVS+=("$env")
@@ -108,17 +107,17 @@ else
     exit 1
 fi
 
-# Map target login manager configurations
+# Precise Target Display Manager Resolver
 if [[ "$TARGET_ENV" == "GNOME (DE)" ]]; then
     TARGET_DM_SERVICE="gdm"
-    if [ "$PKGMGR" == "apt" ]; then TARGET_DM_SERVICE="gdm3"; fi
+    [ "$PKGMGR" == "apt" ] && TARGET_DM_SERVICE="gdm3"
     TARGET_DM_PKGS="$TARGET_DM_SERVICE"
-elif [[ "$TARGET_ENV" == "XFCE (DE)" && ( "$PKGMGR" == "dnf" || "$PKGMGR" == "apt" ) ]]; then
+elif [[ "$TARGET_ENV" == "KDE-Plasma (DE)" || "$TARGET_ENV" == "Hyprland (WM)" || "$TARGET_ENV" == "Sway (WM)" ]]; then
+    TARGET_DM_SERVICE="sddm"
+    [[ "$DISTRO_ID" == "cachyos" || "$DISTRO_ID" == "arch" ]] && TARGET_DM_PKGS="sddm sddm-kcm" || TARGET_DM_PKGS="sddm"
+else
     TARGET_DM_SERVICE="lightdm"
     if [ "$PKGMGR" == "dnf" ]; then TARGET_DM_PKGS="lightdm lightdm-gtk"; else TARGET_DM_PKGS="lightdm lightdm-gtk-greeter"; fi
-else
-    TARGET_DM_SERVICE="sddm"
-    if [[ "$DISTRO_ID" == "cachyos" || "$DISTRO_ID" == "arch" ]]; then TARGET_DM_PKGS="sddm sddm-kcm"; else TARGET_DM_PKGS="sddm"; fi
 fi
 
 # =========================================================
@@ -152,16 +151,29 @@ elif [ "$PKGMGR" == "dnf" ]; then
 
 elif [ "$PKGMGR" == "apt" ]; then
     apt update
-    case $TARGET_ENV in
-        "KDE-Plasma (DE)") apt install -y task-kde-desktop $TARGET_DM_PKGS ;;
-        "GNOME (DE)")      apt install -y task-gnome-desktop $TARGET_DM_PKGS ;;
-        "XFCE (DE)")       apt install -y task-xfce-desktop $TARGET_DM_PKGS ;;
-        "Cinnamon (DE)")   apt install -y task-cinnamon-desktop $TARGET_DM_PKGS ;;
-        "MATE (DE)")       apt install -y task-mate-desktop $TARGET_DM_PKGS ;;
-        "Hyprland (WM)")   apt install -y hyprland $TARGET_DM_PKGS ;;
-        "i3wm (WM)")       apt install -y i3 $TARGET_DM_PKGS ;;
-        "Sway (WM)")       apt install -y sway $TARGET_DM_PKGS ;;
-    esac
+    if [ "$DISTRO_ID" == "ubuntu" ]; then
+        case $TARGET_ENV in
+            "KDE-Plasma (DE)") apt install -y kubuntu-desktop sddm-theme-breeze kde-config-sddm kubuntu-notification-helper $TARGET_DM_PKGS ;;
+            "GNOME (DE)")      apt install -y ubuntu-desktop $TARGET_DM_PKGS ;;
+            "XFCE (DE)")       apt install -y xubuntu-desktop $TARGET_DM_PKGS ;;
+            "Cinnamon (DE)")   apt install -y cinnamon-desktop-environment $TARGET_DM_PKGS ;;
+            "MATE (DE)")       apt install -y ubuntu-mate-desktop $TARGET_DM_PKGS ;;
+            "Hyprland (WM)")   apt install -y hyprland $TARGET_DM_PKGS ;;
+            "i3wm (WM)")       apt install -y i3 $TARGET_DM_PKGS ;;
+            "Sway (WM)")       apt install -y sway $TARGET_DM_PKGS ;;
+        esac
+    else
+        case $TARGET_ENV in
+            "KDE-Plasma (DE)") apt install -y task-kde-desktop sddm-theme-breeze kde-config-sddm $TARGET_DM_PKGS ;;
+            "GNOME (DE)")      apt install -y task-gnome-desktop $TARGET_DM_PKGS ;;
+            "XFCE (DE)")       apt install -y task-xfce-desktop $TARGET_DM_PKGS ;;
+            "Cinnamon (DE)")   apt install -y task-cinnamon-desktop $TARGET_DM_PKGS ;;
+            "MATE (DE)")       apt install -y task-mate-desktop $TARGET_DM_PKGS ;;
+            "Hyprland (WM)")   apt install -y hyprland $TARGET_DM_PKGS ;;
+            "i3wm (WM)")       apt install -y i3 $TARGET_DM_PKGS ;;
+            "Sway (WM)")       apt install -y sway $TARGET_DM_PKGS ;;
+        esac
+    fi
 fi
 
 # =========================================================
@@ -181,7 +193,6 @@ echo "================================================="
 if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
     echo -e "\nPurging $CURRENT_ENV assets from disk..."
     
-    # Append the old login manager to the removal sequence if it changes
     PURGE_DM_STRING=""
     if [ "$CURRENT_DM_SERVICE" != "$TARGET_DM_SERVICE" ]; then
         PURGE_DM_STRING=" $CURRENT_DM_PKGS"
@@ -214,22 +225,35 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
         dnf autoremove -y
 
     elif [ "$PKGMGR" == "apt" ]; then
-        case $CURRENT_ENV in
-            "GNOME (DE)")      apt purge -y task-gnome-desktop gnome-shell $PURGE_DM_STRING ;;
-            "KDE-Plasma (DE)") apt purge -y task-kde-desktop plasma-workspace plasma-desktop $PURGE_DM_STRING ;;
-            "XFCE (DE)")       apt purge -y task-xfce-desktop $PURGE_DM_STRING ;;
-            "Cinnamon (DE)")   apt purge -y task-cinnamon-desktop $PURGE_DM_STRING ;;
-            "MATE (DE)")       apt purge -y task-mate-desktop $PURGE_DM_STRING ;;
-            "Hyprland (WM)")   apt purge -y hyprland $PURGE_DM_STRING ;;
-            "i3wm (WM)")       apt purge -y i3 i3-wm $PURGE_DM_STRING ;;
-            "Sway (WM)")       apt purge -y sway $PURGE_DM_STRING ;;
-        esac
+        if [ "$DISTRO_ID" == "ubuntu" ]; then
+            case $CURRENT_ENV in
+                "GNOME (DE)")      apt purge -y ubuntu-desktop gnome-shell $PURGE_DM_STRING ;;
+                "KDE-Plasma (DE)") apt purge -y kubuntu-desktop plasma-workspace plasma-desktop sddm-theme-breeze kde-config-sddm kubuntu-notification-helper $PURGE_DM_STRING ;;
+                "XFCE (DE)")       apt purge -y xubuntu-desktop $PURGE_DM_STRING ;;
+                "Cinnamon (DE)")   apt purge -y cinnamon-desktop-environment $PURGE_DM_STRING ;;
+                "MATE (DE)")       apt purge -y ubuntu-mate-desktop $PURGE_DM_STRING ;;
+                "Hyprland (WM)")   apt purge -y hyprland $PURGE_DM_STRING ;;
+                "i3wm (WM)")       apt purge -y i3 i3-wm $PURGE_DM_STRING ;;
+                "Sway (WM)")       apt purge -y sway $PURGE_DM_STRING ;;
+            esac
+        else
+            case $CURRENT_ENV in
+                "GNOME (DE)")      apt purge -y task-gnome-desktop gnome-shell $PURGE_DM_STRING ;;
+                "KDE-Plasma (DE)") apt purge -y task-kde-desktop plasma-workspace plasma-desktop sddm-theme-breeze kde-config-sddm $PURGE_DM_STRING ;;
+                "XFCE (DE)")       apt purge -y task-xfce-desktop $PURGE_DM_STRING ;;
+                "Cinnamon (DE)")   apt purge -y task-cinnamon-desktop $PURGE_DM_STRING ;;
+                "MATE (DE)")       apt purge -y task-mate-desktop $PURGE_DM_STRING ;;
+                "Hyprland (WM)")   apt purge -y hyprland $PURGE_DM_STRING ;;
+                "i3wm (WM)")       apt purge -y i3 i3-wm $PURGE_DM_STRING ;;
+                "Sway (WM)")       apt purge -y sway $PURGE_DM_STRING ;;
+            esac
+        fi
         apt autoremove -y
     fi
 fi
 
 echo -e "\nProcess fully executed!"
-read -p "Would you like to reboot your computer right now? (y/n): " reboot_choice
+read -p "Would you like to reboot the virtual machine right now? (y/n): " reboot_choice
 if [[ "$reboot_choice" =~ ^[Yy]$ ]]; then
     reboot
 fi

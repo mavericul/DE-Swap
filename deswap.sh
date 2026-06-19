@@ -34,6 +34,8 @@ detect_current_env() {
         echo "GNOME (DE)"
     elif pgrep -x "kwin_wayland" >/dev/null || pgrep -x "kwin_x11" >/dev/null; then
         echo "KDE-Plasma (DE)"
+    elif pgrep -x "cosmic-comp" >/dev/null; then
+        echo "COSMIC (DE)"
     elif pgrep -x "xfce4-session" >/dev/null; then
         echo "XFCE (DE)"
     elif pgrep -x "cinnamon" >/dev/null; then
@@ -55,7 +57,7 @@ clear 2>/dev/null || true
 CURRENT_ENV=$(detect_current_env)
 
 # Precise Current Display Manager Resolver
-if [[ "$CURRENT_ENV" == "GNOME (DE)" ]]; then
+if [[ "$CURRENT_ENV" == "GNOME (DE)" || "$CURRENT_ENV" == "COSMIC (DE)" ]]; then
     CURRENT_DM_SERVICE="gdm"
     [ "$PKGMGR" == "apt" ] && CURRENT_DM_SERVICE="gdm3"
     CURRENT_DM_PKGS="$CURRENT_DM_SERVICE"
@@ -68,7 +70,7 @@ else
 fi
 
 echo "================================================="
-echo "   Universal Omni-Workspace Swapper v5.4      "
+echo "   Universal Omni-Workspace Swapper v5.5      "
 echo "================================================="
 echo "OS Family Detected: [$DISTRO_ID / $PKGMGR]"
 echo "Active Interface:   [$CURRENT_ENV]"
@@ -77,7 +79,7 @@ echo "================================================="
 # Master framework array
 ALL_ENVS=(
     "KDE-Plasma (DE)" "GNOME (DE)" "XFCE (DE)" 
-    "Cinnamon (DE)" "MATE (DE)" "Hyprland (WM)" 
+    "Cinnamon (DE)" "MATE (DE)" "COSMIC (DE)" "Hyprland (WM)" 
     "i3wm (WM)" "Sway (WM)"
 )
 AVAILABLE_ENVS=()
@@ -108,7 +110,7 @@ else
 fi
 
 # Precise Target Display Manager Resolver
-if [[ "$TARGET_ENV" == "GNOME (DE)" ]]; then
+if [[ "$TARGET_ENV" == "GNOME (DE)" || "$TARGET_ENV" == "COSMIC (DE)" ]]; then
     TARGET_DM_SERVICE="gdm"
     [ "$PKGMGR" == "apt" ] && TARGET_DM_SERVICE="gdm3"
     TARGET_DM_PKGS="$TARGET_DM_SERVICE"
@@ -117,7 +119,7 @@ elif [[ "$TARGET_ENV" == "KDE-Plasma (DE)" || "$TARGET_ENV" == "Hyprland (WM)" |
     [[ "$DISTRO_ID" == "cachyos" || "$DISTRO_ID" == "arch" ]] && TARGET_DM_PKGS="sddm sddm-kcm" || TARGET_DM_PKGS="sddm"
 else
     TARGET_DM_SERVICE="lightdm"
-    if [ "$PKGMGR" == "dnf" ]; then TARGET_DM_PKGS="lightdm lightdm-gtk"; else TARGET_DM_PKGS="lightdm lightdm-gtk-greeter"; fi
+    if [ "$PKGMGR" == "dnf" ]; then CURRENT_DM_PKGS="lightdm lightdm-gtk"; else CURRENT_DM_PKGS="lightdm lightdm-gtk-greeter"; fi
 fi
 
 # =========================================================
@@ -132,6 +134,7 @@ if [ "$PKGMGR" == "pacman" ]; then
         "XFCE (DE)")       pacman -S --needed --noconfirm xfce4 xfce4-goodies $TARGET_DM_PKGS ;;
         "Cinnamon (DE)")   pacman -S --needed --noconfirm cinnamon nemo $TARGET_DM_PKGS ;;
         "MATE (DE)")       pacman -S --needed --noconfirm mate mate-extra $TARGET_DM_PKGS ;;
+        "COSMIC (DE)")     pacman -S --needed --noconfirm cosmic-session $TARGET_DM_PKGS ;;
         "Hyprland (WM)")   pacman -S --needed --noconfirm hyprland $TARGET_DM_PKGS; [ "$DISTRO_ID" == "cachyos" ] && pacman -S --needed --noconfirm cachyos-hyprland-settings ;;
         "i3wm (WM)")       pacman -S --needed --noconfirm i3-wm $TARGET_DM_PKGS; [ "$DISTRO_ID" == "cachyos" ] && pacman -S --needed --noconfirm cachyos-i3wm-settings ;;
         "Sway (WM)")       pacman -S --needed --noconfirm sway $TARGET_DM_PKGS ;;
@@ -144,6 +147,7 @@ elif [ "$PKGMGR" == "dnf" ]; then
         "XFCE (DE)")       dnf install -y @xfce-desktop-environment $TARGET_DM_PKGS ;;
         "Cinnamon (DE)")   dnf install -y @cinnamon-desktop-environment $TARGET_DM_PKGS ;;
         "MATE (DE)")       dnf install -y @mate-desktop-environment $TARGET_DM_PKGS ;;
+        "COSMIC (DE)")     dnf install -y @cosmic-desktop-environment $TARGET_DM_PKGS ;;
         "Hyprland (WM)")   dnf copr enable -y solopasha/hyprland; dnf install -y hyprland $TARGET_DM_PKGS ;;
         "i3wm (WM)")       dnf install -y @i3-desktop-environment $TARGET_DM_PKGS ;;
         "Sway (WM)")       dnf install -y sway $TARGET_DM_PKGS ;;
@@ -158,6 +162,7 @@ elif [ "$PKGMGR" == "apt" ]; then
             "XFCE (DE)")       apt install -y xubuntu-desktop $TARGET_DM_PKGS ;;
             "Cinnamon (DE)")   apt install -y cinnamon-desktop-environment $TARGET_DM_PKGS ;;
             "MATE (DE)")       apt install -y ubuntu-mate-desktop $TARGET_DM_PKGS ;;
+            "COSMIC (DE)")     apt install -y software-properties-common; add-apt-repository -y ppa:hepp3n/cosmic-epoch; apt update; apt install -y cosmic-session $TARGET_DM_PKGS ;;
             "Hyprland (WM)")   apt install -y hyprland $TARGET_DM_PKGS ;;
             "i3wm (WM)")       apt install -y i3 $TARGET_DM_PKGS ;;
             "Sway (WM)")       apt install -y sway $TARGET_DM_PKGS ;;
@@ -169,6 +174,7 @@ elif [ "$PKGMGR" == "apt" ]; then
             "XFCE (DE)")       apt install -y task-xfce-desktop $TARGET_DM_PKGS ;;
             "Cinnamon (DE)")   apt install -y task-cinnamon-desktop $TARGET_DM_PKGS ;;
             "MATE (DE)")       apt install -y task-mate-desktop $TARGET_DM_PKGS ;;
+            "COSMIC (DE)")     apt install -y cosmic-session $TARGET_DM_PKGS ;;
             "Hyprland (WM)")   apt install -y hyprland $TARGET_DM_PKGS ;;
             "i3wm (WM)")       apt install -y i3 $TARGET_DM_PKGS ;;
             "Sway (WM)")       apt install -y sway $TARGET_DM_PKGS ;;
@@ -205,6 +211,7 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
             "XFCE (DE)")       pacman -Rns --noconfirm xfce4 xfce4-goodies $PURGE_DM_STRING 2>/dev/null || true ;;
             "Cinnamon (DE)")   pacman -Rns --noconfirm cinnamon nemo $PURGE_DM_STRING 2>/dev/null || true ;;
             "MATE (DE)")       pacman -Rns --noconfirm mate mate-extra $PURGE_DM_STRING 2>/dev/null || true ;;
+            "COSMIC (DE)")     pacman -Rns --noconfirm cosmic-session $PURGE_DM_STRING 2>/dev/null || true ;;
             "Hyprland (WM)")   pacman -Rns --noconfirm hyprland cachyos-hyprland-settings $PURGE_DM_STRING 2>/dev/null || true ;;
             "i3wm (WM)")       pacman -Rns --noconfirm i3-wm cachyos-i3wm-settings $PURGE_DM_STRING 2>/dev/null || true ;;
             "Sway (WM)")       pacman -Rns --noconfirm sway $PURGE_DM_STRING 2>/dev/null || true ;;
@@ -218,6 +225,7 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
             "XFCE (DE)")       dnf remove -y @xfce-desktop-environment $PURGE_DM_STRING ;;
             "Cinnamon (DE)")   dnf remove -y @cinnamon-desktop-environment $PURGE_DM_STRING ;;
             "MATE (DE)")       dnf remove -y @mate-desktop-environment $PURGE_DM_STRING ;;
+            "COSMIC (DE)")     dnf remove -y @cosmic-desktop-environment $PURGE_DM_STRING ;;
             "Hyprland (WM)")   dnf remove -y hyprland $PURGE_DM_STRING ;;
             "i3wm (WM)")       dnf remove -y @i3-desktop-environment $PURGE_DM_STRING ;;
             "Sway (WM)")       dnf remove -y sway $PURGE_DM_STRING ;;
@@ -232,6 +240,7 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
                 "XFCE (DE)")       apt purge -y xubuntu-desktop $PURGE_DM_STRING ;;
                 "Cinnamon (DE)")   apt purge -y cinnamon-desktop-environment $PURGE_DM_STRING ;;
                 "MATE (DE)")       apt purge -y ubuntu-mate-desktop $PURGE_DM_STRING ;;
+                "COSMIC (DE)")     apt purge -y cosmic-session $PURGE_DM_STRING; apt install -y ppa-purge; ppa-purge -y ppa:hepp3n/cosmic-epoch || true ;;
                 "Hyprland (WM)")   apt purge -y hyprland $PURGE_DM_STRING ;;
                 "i3wm (WM)")       apt purge -y i3 i3-wm $PURGE_DM_STRING ;;
                 "Sway (WM)")       apt purge -y sway $PURGE_DM_STRING ;;
@@ -243,6 +252,7 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
                 "XFCE (DE)")       apt purge -y task-xfce-desktop $PURGE_DM_STRING ;;
                 "Cinnamon (DE)")   apt purge -y task-cinnamon-desktop $PURGE_DM_STRING ;;
                 "MATE (DE)")       apt purge -y task-mate-desktop $PURGE_DM_STRING ;;
+                "COSMIC (DE)")     apt purge -y cosmic-session $PURGE_DM_STRING ;;
                 "Hyprland (WM)")   apt purge -y hyprland $PURGE_DM_STRING ;;
                 "i3wm (WM)")       apt purge -y i3 i3-wm $PURGE_DM_STRING ;;
                 "Sway (WM)")       apt purge -y sway $PURGE_DM_STRING ;;

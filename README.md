@@ -17,6 +17,6 @@ A lightweight, multi-distribution shell script to safely install, switch, and pu
 ```bash
 git clone https://github.com/mavericul/DE-Swap.git
 cd DE-Swap
-chmod +x omni-swap.sh
-sudo ./omni-swap.sh
+chmod +x deswap.sh
+sudo ./deswap.sh
 ```

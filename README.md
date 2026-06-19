@@ -11,3 +11,12 @@ A lightweight, multi-distribution shell script to safely install, switch, and pu
 
 * **Desktops:** GNOME, KDE-Plasma, XFCE, Cinnamon, MATE, COSMIC (Epoch)
 * **Window Managers:** Hyprland, i3wm, Sway
+
+## Install:
+
+```bash
+git clone https://github.com/mavericul/DE-Swap.git
+cd DE-Swap
+chmod +x omni-swap.sh
+sudo ./omni-swap.sh
+```

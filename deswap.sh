@@ -70,7 +70,7 @@ else
 fi
 
 echo "================================================="
-echo "   Universal Omni-Workspace Swapper v5.9      "
+echo "   Universal Omni-Workspace Swapper v6.1      "
 echo "================================================="
 echo "OS Family Detected: [$DISTRO_ID / $PKGMGR]"
 echo "Active Interface:   [$CURRENT_ENV]"
@@ -243,7 +243,7 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
                 "GNOME (DE)")      apt purge -y task-gnome-desktop gnome-shell $PURGE_DM_STRING ;;
                 "KDE-Plasma (DE)") apt purge -y task-kde-desktop plasma-workspace plasma-desktop sddm-theme-breeze kde-config-sddm $PURGE_DM_STRING ;;
                 "XFCE (DE)")       apt purge -y task-xfce-desktop $PURGE_DM_STRING ;;
-                "Cinnamon (DE)")   apt purge -y task-cinnamon-desktop $PURGE_DM_STRING ;;
+                "Cinnamon (DE)")   apt purge -y task-cinnamon-desktop $TARGET_DM_PKGS ;;
                 "MATE (DE)")       apt purge -y task-mate-desktop mate-desktop-environment* mate-session-manager mate-panel caja pluma mate-terminal $PURGE_DM_STRING ;;
                 "COSMIC (DE)")     apt purge -y cosmic-session $PURGE_DM_STRING ;;
                 "Hyprland (WM)")   apt purge -y hyprland $PURGE_DM_STRING ;;
@@ -252,8 +252,22 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
             esac
         fi
         apt autoremove --purge -y
-        update-desktop-database 2>/dev/null || true
     fi
+
+    # Direct File-Level Session Purge Hook
+    echo "Clearing matching workspace session definitions..."
+    case $CURRENT_ENV in
+        "GNOME (DE)")      rm -f /usr/share/xsessions/ubuntu* /usr/share/wayland-sessions/ubuntu* /usr/share/xsessions/gnome* /usr/share/wayland-sessions/gnome* ;;
+        "KDE-Plasma (DE)") rm -f /usr/share/xsessions/plasma* /usr/share/wayland-sessions/plasma* ;;
+        "XFCE (DE)")       rm -f /usr/share/xsessions/xfce* ;;
+        "Cinnamon (DE)")   rm -f /usr/share/xsessions/cinnamon* ;;
+        "MATE (DE)")       rm -f /usr/share/xsessions/mate* ;;
+        "COSMIC (DE)")     rm -f /usr/share/wayland-sessions/cosmic* ;;
+        "Hyprland (WM)")   rm -f /usr/share/wayland-sessions/hyprland* ;;
+        "i3wm (WM)")       rm -f /usr/share/xsessions/i3* ;;
+        "Sway (WM)")       rm -f /usr/share/wayland-sessions/sway* ;;
+    esac
+    update-desktop-database 2>/dev/null || true
 fi
 
 # =========================================================

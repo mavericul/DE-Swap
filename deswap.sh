@@ -70,7 +70,7 @@ else
 fi
 
 echo "================================================="
-echo "   Universal Omni-Workspace Swapper v5.7      "
+echo "   Universal Omni-Workspace Swapper v5.9      "
 echo "================================================="
 echo "OS Family Detected: [$DISTRO_ID / $PKGMGR]"
 echo "Active Interface:   [$CURRENT_ENV]"
@@ -119,7 +119,7 @@ elif [[ "$TARGET_ENV" == "KDE-Plasma (DE)" || "$TARGET_ENV" == "Hyprland (WM)" |
     [[ "$DISTRO_ID" == "cachyos" || "$DISTRO_ID" == "arch" ]] && TARGET_DM_PKGS="sddm sddm-kcm" || TARGET_DM_PKGS="sddm"
 else
     TARGET_DM_SERVICE="lightdm"
-    if [ "$PKGMGR" == "dnf" ]; then CURRENT_DM_PKGS="lightdm lightdm-gtk"; else CURRENT_DM_PKGS="lightdm lightdm-gtk-greeter"; fi
+    if [ "$PKGMGR" == "dnf" ]; then TARGET_DM_PKGS="lightdm lightdm-gtk"; else TARGET_DM_PKGS="lightdm lightdm-gtk-greeter"; fi
 fi
 
 # =========================================================
@@ -183,21 +183,7 @@ elif [ "$PKGMGR" == "apt" ]; then
 fi
 
 # =========================================================
-# 5. UNIFIED DISPLAY MANAGER ROUTER
-# =========================================================
-echo -e "\nFinalizing display manager alignment..."
-systemctl disable gdm gdm3 sddm lightdm 2>/dev/null || true
-systemctl enable $TARGET_DM_SERVICE --force
-
-if [ "$PKGMGR" == "apt" ]; then
-    DM_BIN_PATH=$(command -v $TARGET_DM_SERVICE)
-    if [ -n "$DM_BIN_PATH" ]; then
-        echo "$DM_BIN_PATH" > /etc/X11/default-display-manager
-    fi
-fi
-
-# =========================================================
-# 6. OPTIONAL DEEP PURGE PHASE (Executes SECOND)
+# 5. OPTIONAL DEEP PURGE PHASE (Executes SECOND)
 # =========================================================
 echo "================================================="
 read -p "Complete the swap by permanently deleting $CURRENT_ENV and its login manager ($CURRENT_DM_SERVICE)? (y/n): " purge_choice
@@ -270,8 +256,22 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
     fi
 fi
 
+# =========================================================
+# 6. UNIFIED DISPLAY MANAGER ROUTER (Executes LAST)
+# =========================================================
+echo -e "\nFinalizing display manager alignment..."
+systemctl disable gdm gdm3 sddm lightdm 2>/dev/null || true
+systemctl enable $TARGET_DM_SERVICE --force
+
+if [ "$PKGMGR" == "apt" ]; then
+    DM_BIN_PATH=$(command -v $TARGET_DM_SERVICE)
+    if [ -n "$DM_BIN_PATH" ]; then
+        echo "$DM_BIN_PATH" > /etc/X11/default-display-manager
+    fi
+fi
+
 echo -e "\nProcess fully executed!"
 read -p "Would you like to reboot the virtual machine right now? (y/n): " reboot_choice
 if [[ "$reboot_choice" =~ ^[Yy]$ ]]; then
-    reboot
+    systemctl reboot -i
 fi

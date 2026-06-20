@@ -123,6 +123,21 @@ else
 fi
 
 # =========================================================
+# 3.5 CONFIRMATION CHECKPOINT
+# =========================================================
+echo "================================================="
+echo " Ready to transition from $CURRENT_ENV to $TARGET_ENV."
+echo " This will fetch core system components using $PKGMGR."
+echo "================================================="
+read -p "Are you sure you want to proceed with the installation? (y/n): " confirm_install
+echo "================================================="
+
+if [[ ! "$confirm_install" =~ ^[Yy]$ ]]; then
+    echo "Operation aborted by user. No changes made."
+    exit 0
+fi
+
+# =========================================================
 # 4. UNIFIED INSTALLATION PHASE (Executes FIRST)
 # =========================================================
 echo -e "\nDeploying and rebuilding $TARGET_ENV via $PKGMGR..."

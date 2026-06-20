@@ -70,7 +70,7 @@ else
 fi
 
 echo "================================================="
-echo "   Universal Omni-Workspace Swapper v6.1      "
+echo "   Universal Omni-Workspace Swapper v6.2      "
 echo "================================================="
 echo "OS Family Detected: [$DISTRO_ID / $PKGMGR]"
 echo "Active Interface:   [$CURRENT_ENV]"
@@ -119,7 +119,7 @@ elif [[ "$TARGET_ENV" == "KDE-Plasma (DE)" || "$TARGET_ENV" == "Hyprland (WM)" |
     [[ "$DISTRO_ID" == "cachyos" || "$DISTRO_ID" == "arch" ]] && TARGET_DM_PKGS="sddm sddm-kcm" || TARGET_DM_PKGS="sddm"
 else
     TARGET_DM_SERVICE="lightdm"
-    if [ "$PKGMGR" == "dnf" ]; then TARGET_DM_PKGS="lightdm lightdm-gtk"; else TARGET_DM_PKGS="lightdm lightdm-gtk-greeter"; fi
+    if [ "$PKGMGR" == "dnf" ]; then CURRENT_DM_PKGS="lightdm lightdm-gtk"; else CURRENT_DM_PKGS="lightdm lightdm-gtk-greeter"; fi
 fi
 
 # =========================================================
@@ -199,16 +199,40 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
 
     if [ "$PKGMGR" == "pacman" ]; then
         case $CURRENT_ENV in
-            "GNOME (DE)")      pacman -Rns --noconfirm gnome gnome-extra cachyos-gnome-settings gnome-shell-extension-appindicator nautilus-python nautilus-open-any-terminal $PURGE_DM_STRING 2>/dev/null || true ;;
-            "KDE-Plasma (DE)") pacman -Rns --noconfirm plasma-meta kde-applications sddm-kcm $PURGE_DM_STRING 2>/dev/null || true ;;
-            "XFCE (DE)")       pacman -Rns --noconfirm xfce4 xfce4-goodies $PURGE_DM_STRING 2>/dev/null || true ;;
-            "Cinnamon (DE)")   pacman -Rns --noconfirm cinnamon nemo $PURGE_DM_STRING 2>/dev/null || true ;;
-            "MATE (DE)")       pacman -Rns --noconfirm mate mate-extra $PURGE_DM_STRING 2>/dev/null || true ;;
-            "COSMIC (DE)")     pacman -Rns --noconfirm cosmic-session $PURGE_DM_STRING 2>/dev/null || true ;;
-            "Hyprland (WM)")   pacman -Rns --noconfirm hyprland cachyos-hyprland-settings $PURGE_DM_STRING 2>/dev/null || true ;;
-            "i3wm (WM)")       pacman -Rns --noconfirm i3-wm cachyos-i3wm-settings $PURGE_DM_STRING 2>/dev/null || true ;;
-            "Sway (WM)")       pacman -Rns --noconfirm sway $PURGE_DM_STRING 2>/dev/null || true ;;
+            "GNOME (DE)")      
+                pacman -Rns --noconfirm gnome gnome-extra cachyos-gnome-settings gnome-shell-extension-appindicator nautilus-python nautilus-open-any-terminal $PURGE_DM_STRING 2>/dev/null || true 
+                ;;
+            "KDE-Plasma (DE)") 
+                # Expanded Group Resolver: Forces pacman to scale backwards into implicit dependencies
+                pacman -Rns --noconfirm $(pacman -Qg plasma 2>/dev/null | awk '{print $2}') 2>/dev/null || true
+                pacman -Rns --noconfirm $(pacman -Qg kde-applications 2>/dev/null | awk '{print $2}') 2>/dev/null || true
+                pacman -Rns --noconfirm plasma-meta kde-applications sddm-kcm $PURGE_DM_STRING 2>/dev/null || true 
+                ;;
+            "XFCE (DE)")       
+                pacman -Rns --noconfirm xfce4 xfce4-goodies $PURGE_DM_STRING 2>/dev/null || true 
+                ;;
+            "Cinnamon (DE)")   
+                pacman -Rns --noconfirm cinnamon nemo $PURGE_DM_STRING 2>/dev/null || true 
+                ;;
+            "MATE (DE)")       
+                pacman -Rns --noconfirm $(pacman -Qg mate 2>/dev/null | awk '{print $2}') 2>/dev/null || true
+                pacman -Rns --noconfirm $(pacman -Qg mate-extra 2>/dev/null | awk '{print $2}') 2>/dev/null || true
+                pacman -Rns --noconfirm mate mate-extra $PURGE_DM_STRING 2>/dev/null || true 
+                ;;
+            "COSMIC (DE)")     
+                pacman -Rns --noconfirm cosmic-session $PURGE_DM_STRING 2>/dev/null || true 
+                ;;
+            "Hyprland (WM)")   
+                pacman -Rns --noconfirm hyprland cachyos-hyprland-settings $PURGE_DM_STRING 2>/dev/null || true 
+                ;;
+            "i3wm (WM)")       
+                pacman -Rns --noconfirm i3-wm cachyos-i3wm-settings $PURGE_DM_STRING 2>/dev/null || true 
+                ;;
+            "Sway (WM)")       
+                pacman -Rns --noconfirm sway $PURGE_DM_STRING 2>/dev/null || true 
+                ;;
         esac
+        # Aggressive unreferenced orphan collection
         pacman -Rns --noconfirm $(pacman -Qtdq) 2>/dev/null || true
 
     elif [ "$PKGMGR" == "dnf" ]; then

@@ -70,7 +70,7 @@ else
 fi
 
 echo "================================================="
-echo "   Universal Omni-Workspace Swapper v5.6      "
+echo "   Universal Omni-Workspace Swapper v5.7      "
 echo "================================================="
 echo "OS Family Detected: [$DISTRO_ID / $PKGMGR]"
 echo "Active Interface:   [$CURRENT_ENV]"
@@ -189,7 +189,6 @@ echo -e "\nFinalizing display manager alignment..."
 systemctl disable gdm gdm3 sddm lightdm 2>/dev/null || true
 systemctl enable $TARGET_DM_SERVICE --force
 
-# Debian/Ubuntu specific file-level default login screen override
 if [ "$PKGMGR" == "apt" ]; then
     DM_BIN_PATH=$(command -v $TARGET_DM_SERVICE)
     if [ -n "$DM_BIN_PATH" ]; then
@@ -244,10 +243,10 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
         if [ "$DISTRO_ID" == "ubuntu" ]; then
             case $CURRENT_ENV in
                 "GNOME (DE)")      apt purge -y ubuntu-desktop gnome-shell $PURGE_DM_STRING ;;
-                "KDE-Plasma (DE)") apt purge -y kubuntu-desktop plasma-workspace plasma-desktop sddm-theme-breeze kde-config-sddm kubuntu-notification-helper $PURGE_DM_STRING ;;
-                "XFCE (DE)")       apt purge -y xubuntu-desktop $PURGE_DM_STRING ;;
-                "Cinnamon (DE)")   apt purge -y cinnamon-desktop-environment $PURGE_DM_STRING ;;
-                "MATE (DE)")       apt purge -y ubuntu-mate-desktop $PURGE_DM_STRING ;;
+                "KDE-Plasma (DE)") apt purge -y kubuntu-desktop plasma-workspace plasma-desktop kde-standard gwenview juk kate kcalc kmail konsole korganizer sweeper okular kaddressbook ktnef kwalletmanager kwrite kio-extras pim-data-exporter sieve-editor qrca sddm-theme-breeze $PURGE_DM_STRING ;;
+                "XFCE (DE)")       apt purge -y xubuntu-desktop xfce4 xfce4-goodies $PURGE_DM_STRING ;;
+                "Cinnamon (DE)")   apt purge -y cinnamon-desktop-environment cinnamon nemo $PURGE_DM_STRING ;;
+                "MATE (DE)")       apt purge -y ubuntu-mate-desktop ubuntu-mate-core mate-desktop-environment* mate-desktop mate-desktop-core mate-session-manager mate-panel caja pluma mate-terminal mate-utils atril engrampa marco mate-calc* mate-font-viewer $PURGE_DM_STRING ;;
                 "COSMIC (DE)")     apt purge -y cosmic-session $PURGE_DM_STRING; apt install -y ppa-purge; ppa-purge -y ppa:hepp3n/cosmic-epoch || true ;;
                 "Hyprland (WM)")   apt purge -y hyprland $PURGE_DM_STRING ;;
                 "i3wm (WM)")       apt purge -y i3 i3-wm $PURGE_DM_STRING ;;
@@ -259,14 +258,15 @@ if [[ "$purge_choice" =~ ^[Yy]$ ]]; then
                 "KDE-Plasma (DE)") apt purge -y task-kde-desktop plasma-workspace plasma-desktop sddm-theme-breeze kde-config-sddm $PURGE_DM_STRING ;;
                 "XFCE (DE)")       apt purge -y task-xfce-desktop $PURGE_DM_STRING ;;
                 "Cinnamon (DE)")   apt purge -y task-cinnamon-desktop $PURGE_DM_STRING ;;
-                "MATE (DE)")       apt purge -y task-mate-desktop $PURGE_DM_STRING ;;
+                "MATE (DE)")       apt purge -y task-mate-desktop mate-desktop-environment* mate-session-manager mate-panel caja pluma mate-terminal $PURGE_DM_STRING ;;
                 "COSMIC (DE)")     apt purge -y cosmic-session $PURGE_DM_STRING ;;
                 "Hyprland (WM)")   apt purge -y hyprland $PURGE_DM_STRING ;;
-                "i3wm (WM)")       apt install -y i3 i3-wm $PURGE_DM_STRING ;;
+                "i3wm (WM)")       apt purge -y i3 i3-wm $PURGE_DM_STRING ;;
                 "Sway (WM)")       apt purge -y sway $PURGE_DM_STRING ;;
             esac
         fi
-        apt autoremove -y
+        apt autoremove --purge -y
+        update-desktop-database 2>/dev/null || true
     fi
 fi
 
